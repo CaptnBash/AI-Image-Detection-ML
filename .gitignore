@@ -3,3 +3,5 @@ AI/*.jpg
 AI/*.png
 REAL/*.jpg
 REAL/*.png
+
+histograms.npy
