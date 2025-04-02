@@ -28,26 +28,27 @@ print(f"Given data: {len(images)} images")
 print(f"Real images: {len(real_images)}")
 print(f"AI images: {len(ai_images)}")
 
-# pick a random images
-indices = random.sample(range(len(images)), 10000)
-rand_images = [images[i] for i in indices]
-rand_categories = [image_categories[i] for i in indices]
-
-# computing histograms
-histograms = []
-with Bar("Computing histograms...", max=len(indices)) as bar:
-    for image in rand_images:
-        histogram = compute_histogram(image)
-        histograms.append(histogram)
-        bar.next()
+histograms_file = "histograms.npy"
+if not os.path.exists(histograms_file):
+    # computing histograms
+    histograms = []
+    with Bar("Computing histograms...", max=len(images)) as bar:
+        for image in images:
+            histogram = compute_histogram(image)
+            histograms.append(histogram)
+            bar.next()
         
-y = rand_categories
-# np.save("histograms.npy", histograms)
+    histograms = np.array(histograms)
+    np.save(histograms_file, histograms)
 
+# training model
+print("\ntraining model...")
+histograms = np.load(histograms_file)
+y = image_categories
 X_train, X_test, y_train, y_test = train_test_split(histograms, y, test_size=0.2)
 clf = RandomForestClassifier().fit(X_train, y_train)
 
 predictions = clf.predict(X_test)
 
 score = accuracy_score(y_test, predictions)
-print(score)
+print("Accuracy score: " + str(score))
