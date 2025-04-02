@@ -3,7 +3,8 @@ import cv2
 from sklearn.model_selection import train_test_split
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import accuracy_score
-import os
+from progress.bar import Bar
+import os, random
 
 def compute_histogram(image_path, bins=256):
     img = cv2.imread(image_path)
@@ -14,10 +15,33 @@ def compute_histogram(image_path, bins=256):
     hist_b = cv2.calcHist([img_rgb], [2], None, [bins], [0, 256]).flatten()
     return np.concatenate([hist_r, hist_g, hist_b])
 
-image_paths = os.listdir("images")
+# get image list
+real_images = [f"REAL/{file}" for file in os.listdir("REAL") if file.lower().endswith(('.jpg', '.png'))]
+ai_images = [f"AI/{file}" for file in os.listdir("AI") if file.lower().endswith(('.jpg', '.png'))]
+images = real_images + ai_images
 
-histograms = np.array([compute_histogram(f"images/{path}") for path in image_paths])
-y = ["real"] * len(histograms)
+real_images_category = ["REAL"] * len(real_images)
+ai_images_category = ["AI"] * len(ai_images)
+image_categories = real_images_category + ai_images_category
+
+print(f"Given data: {len(images)} images")
+print(f"Real images: {len(real_images)}")
+print(f"AI images: {len(ai_images)}")
+
+# pick a random images
+indices = random.sample(range(len(images)), 10000)
+rand_images = [images[i] for i in indices]
+rand_categories = [image_categories[i] for i in indices]
+
+# computing histograms
+histograms = []
+with Bar("Computing histograms...", max=len(indices)) as bar:
+    for image in rand_images:
+        histogram = compute_histogram(image)
+        histograms.append(histogram)
+        bar.next()
+        
+y = rand_categories
 # np.save("histograms.npy", histograms)
 
 X_train, X_test, y_train, y_test = train_test_split(histograms, y, test_size=0.2)
