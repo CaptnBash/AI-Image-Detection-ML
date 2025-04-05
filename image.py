@@ -1,10 +1,16 @@
-import numpy as np
+import os
+from pickle import dump, load
+
 import cv2
-from sklearn.model_selection import train_test_split
+import numpy as np
+import pandas as pd
+from progress.bar import Bar
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import accuracy_score
-from progress.bar import Bar
-import os, random
+from sklearn.model_selection import train_test_split
+
+histograms_file = "histograms.npy"
+model_file = "model.pkl"
 
 def compute_histogram(image_path, bins=256):
     img = cv2.imread(image_path)
@@ -28,7 +34,6 @@ print(f"Given data: {len(images)} images")
 print(f"Real images: {len(real_images)}")
 print(f"AI images: {len(ai_images)}")
 
-histograms_file = "histograms.npy"
 if not os.path.exists(histograms_file):
     # computing histograms
     histograms = []
@@ -40,14 +45,27 @@ if not os.path.exists(histograms_file):
         
     histograms = np.array(histograms)
     np.save(histograms_file, histograms)
+else:
+    histograms = np.load(histograms_file)
 
-# training model
-print("\ntraining model...")
-histograms = np.load(histograms_file)
 y = image_categories
 X_train, X_test, y_train, y_test = train_test_split(histograms, y, test_size=0.2)
-clf = RandomForestClassifier().fit(X_train, y_train)
 
+# training model
+if not os.path.exists(model_file):
+    print("\ntraining model...")
+    clf = RandomForestClassifier().fit(X_train, y_train)
+
+    print("\nsaving the model...")
+    with open(model_file, "wb") as f:
+        dump(clf, f, protocol=5)
+else:
+    # load model
+    print("\nloading the model...")
+    with open(model_file, "rb") as f:
+        clf = load(f)
+
+# making predictions
 predictions = clf.predict(X_test)
 
 score = accuracy_score(y_test, predictions)
