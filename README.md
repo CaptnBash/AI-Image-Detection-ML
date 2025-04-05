@@ -1,19 +1,26 @@
 # AI Image detection
 
-## scripts
+## utils
  
-[download-laion-highres-parquet.sh](util/download-laion-highres-parquet.sh)
+[download-laion-images.py](util/download-laion-images.py)
 
-Downloads all ```.parquet``` files from [huggingface](https://huggingface.co/datasets/laion/laion-high-resolution).
+Downloads a specified amount of images (default 200'000) from [huggingface](https://huggingface.co/datasets/laion/laion-high-resolution).
 ###
 ```
-export HF_TOKEN=your_huggingface_token
-./download-laion-highres.sh
+folder = "laion-images" # change to whatever folder
+login(token="your-token") # input your huggingface token
+
+images_count = 200000
 ```
+Change these lines and start the script.
 
-## source for images:
+The token can be generated [here](https://huggingface.co/settings/tokens).
 
-https://www.kaggle.com/datasets/superpotato9/dalle-recognition-dataset
+## source for real images:
 
 https://huggingface.co/datasets/laion/laion-high-resolution 
+
+## source for AI and real images:
+
+https://www.kaggle.com/datasets/superpotato9/dalle-recognition-dataset  (only DALL-E)
 
