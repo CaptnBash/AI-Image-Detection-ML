@@ -5,3 +5,4 @@ REAL/*.jpg
 REAL/*.png
 
 histograms.npy
+*.pkl
