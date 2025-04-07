@@ -1,17 +1,12 @@
 import os
-import settings, train
+import settings, model_helper
 from settings import *
 
 import cv2
 import numpy as np
 from progress.bar import Bar
-from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import accuracy_score
 from sklearn.model_selection import train_test_split
-
-histograms_file = settings.HISTOGRAMS_FILE
-model_file = settings.MODEL_FILE
-test_size = settings.TEST_SIZE
 
 def compute_histogram(image_path, bins=256):
     img = cv2.imread(image_path)
@@ -27,15 +22,15 @@ real_images_path_list = [f"{settings.REAL_IMAGES_FOLDER}/{file}" for file in os.
 ai_images_path_list = [f"{settings.AI_IMAGES_FOLDER}/{file}" for file in os.listdir(settings.AI_IMAGES_FOLDER) if file.lower().endswith(('.jpg', '.png'))]
 images = real_images_path_list + ai_images_path_list
 
-real_images_category = ["REAL"] * len(real_images)
-ai_images_category = ["AI"] * len(ai_images)
+real_images_category = ["REAL"] * len(real_images_path_list)
+ai_images_category = ["AI"] * len(ai_images_path_list)
 image_categories = real_images_category + ai_images_category
 
 print(f"Given data: {len(images)} images")
-print(f"Real images: {len(real_images)}")
-print(f"AI images: {len(ai_images)}")
+print(f"Real images: {len(real_images_path_list)}")
+print(f"AI images: {len(ai_images_path_list)}")
 
-if not os.path.exists(histograms_file):
+if not os.path.exists(HISTOGRAMS_FILE):
     # computing histograms
     histograms = []
     with Bar("Computing histograms...", max=len(images)) as bar:
@@ -45,29 +40,19 @@ if not os.path.exists(histograms_file):
             bar.next()
         
     histograms = np.array(histograms)
-    np.save(histograms_file, histograms)
+    np.save(HISTOGRAMS_FILE, histograms)
 else:
-    histograms = np.load(histograms_file)
+    histograms = np.load(HISTOGRAMS_FILE)
 
 y = image_categories
-X_train, X_test, y_train, y_test = train_test_split(histograms, y, test_size=test_size)
+X_train, X_test, y_train, y_test = train_test_split(histograms, y, test_size=TEST_SIZE)
 
-# training model
-if not os.path.exists(model_file):
-    print("\ntraining model...")
-    clf = RandomForestClassifier().fit(X_train, y_train)
-
-    print("\nsaving the model...")
-    with open(model_file, "wb") as f:
-        dump(clf, f, protocol=5)
-else:
-    # load model
-    print("\nloading the model...")
-    with open(model_file, "rb") as f:
-        clf = load(f)
+clf = model_helper.get_model(X_train, y_train, save=False)
 
 # making predictions
 predictions = clf.predict(X_test)
 
 score = accuracy_score(y_test, predictions)
 print("Accuracy score: " + str(score))
+
+print(clf.predict([compute_histogram("image.jpg")]))
