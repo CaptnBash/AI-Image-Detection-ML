@@ -1,13 +1,13 @@
-from huggingface_hub import login
 from datasets import load_dataset
 import os, hashlib, socket
 from urllib.request import urlretrieve
 from concurrent.futures import ThreadPoolExecutor, as_completed
+import settings
 
-images_count = 200000
-folder = "laion-images" # change to whatever folder
-login(token="your-token") # input your huggingface token
-max_workers = 20  # Adjust based on your network bandwidth (10-50 typically good)
+images_count = settings.IMAGE_DOWNLOAD_COUNT
+folder = settings.DOWNLOADED_IMAGES_FOLDER
+login = settings.LOGIN
+max_workers = settings.MAX_WORKERS
 
 socket.setdefaulttimeout(3)
 # Load dataset and get URLs

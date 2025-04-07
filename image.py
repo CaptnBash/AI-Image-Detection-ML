@@ -1,16 +1,18 @@
 import os
 from pickle import dump, load
 
+import settings
+
 import cv2
 import numpy as np
-import pandas as pd
 from progress.bar import Bar
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import accuracy_score
 from sklearn.model_selection import train_test_split
 
-histograms_file = "histograms.npy"
-model_file = "model.pkl"
+histograms_file = settings.HISTOGRAMS_FILE
+model_file = settings.MODEL_FILE
+test_size = settings.TEST_SIZE
 
 def compute_histogram(image_path, bins=256):
     img = cv2.imread(image_path)
@@ -49,7 +51,7 @@ else:
     histograms = np.load(histograms_file)
 
 y = image_categories
-X_train, X_test, y_train, y_test = train_test_split(histograms, y, test_size=0.2)
+X_train, X_test, y_train, y_test = train_test_split(histograms, y, test_size=test_size)
 
 # training model
 if not os.path.exists(model_file):
