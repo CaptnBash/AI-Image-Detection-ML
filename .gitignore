@@ -6,3 +6,5 @@ REAL/*.png
 
 histograms.npy
 *.pkl
+
+__pycache__/

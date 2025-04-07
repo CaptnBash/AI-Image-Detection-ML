@@ -7,5 +7,8 @@ TEST_SIZE = 0.2 # 20% of all images are used for testing
 
 IMAGE_DOWNLOAD_COUNT = 200000
 DOWNLOADED_IMAGES_FOLDER = "laion-images" # change to whatever folder
-LOGIN = login(token="your-token") # input your huggingface token
+#LOGIN = login(token="your-token") # input your huggingface token
 MAX_WORKERS = 20  # Adjust based on your network bandwidth (10-50 typically good)
+
+REAL_IMAGES_FOLDER = "REAL"
+AI_IMAGES_FOLDER = "AI"

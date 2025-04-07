@@ -1,7 +1,6 @@
 import os
-from pickle import dump, load
-
-import settings
+import settings, train
+from settings import *
 
 import cv2
 import numpy as np
@@ -24,9 +23,9 @@ def compute_histogram(image_path, bins=256):
     return np.concatenate([hist_r, hist_g, hist_b])
 
 # get image list
-real_images = [f"REAL/{file}" for file in os.listdir("REAL") if file.lower().endswith(('.jpg', '.png'))]
-ai_images = [f"AI/{file}" for file in os.listdir("AI") if file.lower().endswith(('.jpg', '.png'))]
-images = real_images + ai_images
+real_images_path_list = [f"{settings.REAL_IMAGES_FOLDER}/{file}" for file in os.listdir(settings.REAL_IMAGES_FOLDER) if file.lower().endswith(('.jpg', '.png'))]
+ai_images_path_list = [f"{settings.AI_IMAGES_FOLDER}/{file}" for file in os.listdir(settings.AI_IMAGES_FOLDER) if file.lower().endswith(('.jpg', '.png'))]
+images = real_images_path_list + ai_images_path_list
 
 real_images_category = ["REAL"] * len(real_images)
 ai_images_category = ["AI"] * len(ai_images)

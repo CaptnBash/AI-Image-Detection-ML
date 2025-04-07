@@ -1,9 +1,10 @@
 import os
 import cv2
 from progress.bar import Bar
+import settings
+
 
 deleted_count = 0
-
 def try_compute_histogram(image_path):
     global deleted_count
     try:
@@ -15,8 +16,8 @@ def try_compute_histogram(image_path):
 
 
 # get image list
-real_images = [f"REAL/{file}" for file in os.listdir("REAL") if file.lower().endswith(('.jpg', '.png'))]
-ai_images = [f"AI/{file}" for file in os.listdir("AI") if file.lower().endswith(('.jpg', '.png'))]
+real_images = [f"{settings.REAL_IMAGES_FOLDER}/{file}" for file in os.listdir(settings.REAL_IMAGES_FOLDER) if file.lower().endswith(('.jpg', '.png'))]
+ai_images = [f"{settings.AI_IMAGES_FOLDER}/{file}" for file in os.listdir(settings.AI_IMAGES_FOLDER) if file.lower().endswith(('.jpg', '.png'))]
 images = real_images + ai_images
 
 # cleaning images 
