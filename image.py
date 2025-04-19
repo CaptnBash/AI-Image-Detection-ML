@@ -1,4 +1,4 @@
-import os
+import os, time
 import settings, model_helper
 from settings import *
 
@@ -47,12 +47,13 @@ else:
 y = image_categories
 X_train, X_test, y_train, y_test = train_test_split(histograms, y, test_size=TEST_SIZE)
 
+starttime = time.time()
 clf = model_helper.get_model(X_train, y_train, save=False)
+print("took " + time.strftime("%Hh %Mm %Ss", time.gmtime(time.time() - starttime)))
 
 # making predictions
 predictions = clf.predict(X_test)
 
 score = accuracy_score(y_test, predictions)
-print("Accuracy score: " + str(score))
+print("\nAccuracy score: " + str(score))
 
-print(clf.predict([compute_histogram("image.jpg")]))
