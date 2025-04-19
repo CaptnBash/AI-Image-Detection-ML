@@ -24,3 +24,5 @@ https://huggingface.co/datasets/laion/laion-high-resolution
 
 https://www.kaggle.com/datasets/superpotato9/dalle-recognition-dataset  (only DALL-E)
 
+https://www.kaggle.com/datasets/tristanzhang32/ai-generated-images-vs-real-images/data 
+
