@@ -47,9 +47,9 @@ else:
 y = image_categories
 X_train, X_test, y_train, y_test = train_test_split(histograms, y, test_size=TEST_SIZE)
 
-starttime = time.time()
+start_time = time.time()
 clf = model_helper.get_model(X_train, y_train, save=False)
-print("took " + time.strftime("%Hh %Mm %Ss", time.gmtime(time.time() - starttime)))
+print("took " + time.strftime("%Hh %Mm %Ss", time.gmtime(time.time() - start_time)))
 
 # making predictions
 predictions = clf.predict(X_test)
