@@ -1,5 +1,5 @@
 import os, time
-import settings, model_helper
+import model_helper
 from settings import *
 
 import cv2
@@ -18,8 +18,8 @@ def compute_histogram(image_path, bins=256):
     return np.concatenate([hist_r, hist_g, hist_b])
 
 # get image list
-real_images_path_list = [f"{settings.REAL_IMAGES_FOLDER}/{file}" for file in os.listdir(settings.REAL_IMAGES_FOLDER) if file.lower().endswith(('.jpg', '.png'))]
-fake_images_path_list = [f"{settings.FAKE_IMAGES_FOLDER}/{file}" for file in os.listdir(settings.FAKE_IMAGES_FOLDER) if file.lower().endswith(('.jpg', '.png'))]
+real_images_path_list = [f"{REAL_IMAGES_FOLDER}/{file}" for file in os.listdir(REAL_IMAGES_FOLDER) if file.lower().endswith(('.jpg', '.png'))]
+fake_images_path_list = [f"{FAKE_IMAGES_FOLDER}/{file}" for file in os.listdir(FAKE_IMAGES_FOLDER) if file.lower().endswith(('.jpg', '.png'))]
 images = real_images_path_list + fake_images_path_list
 
 real_images_category = ["REAL"] * len(real_images_path_list)
