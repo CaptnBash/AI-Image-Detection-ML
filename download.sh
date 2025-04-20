@@ -1,14 +1,15 @@
 #!/usr/bin/env bash
 
 rename_files() {
-        cd $1
-        for file in $(ls)
+        cd "$1" || exit
+        for file in *
         do
-                new_name=$(md5sum $file | cut -d ' ' -f1).jpg
-                echo "renaming file $file to $new_name"
-                mv $file $new_name
+          [[ -e "$file" ]] || break
+          new_name=$(md5sum "$file" | cut -d ' ' -f1).jpg
+          echo "renaming file $file to $new_name"
+          mv "$file" "$new_name"
         done
-        cd -
+        cd - || exit
 }
 
 curl -L -o ./archive.zip\
