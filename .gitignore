@@ -1,6 +1,6 @@
 .venv/
-AI/*.jpg
-AI/*.png
+FAKE/*.jpg
+FAKE/*.png
 REAL/*.jpg
 REAL/*.png
 

@@ -11,4 +11,4 @@ DOWNLOADED_IMAGES_FOLDER = "laion-images" # change to whatever folder
 MAX_WORKERS = 20  # Adjust based on your network bandwidth (10-50 typically good)
 
 REAL_IMAGES_FOLDER = "REAL"
-AI_IMAGES_FOLDER = "AI"
+FAKE_IMAGES_FOLDER = "FAKE"

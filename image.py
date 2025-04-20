@@ -19,16 +19,16 @@ def compute_histogram(image_path, bins=256):
 
 # get image list
 real_images_path_list = [f"{settings.REAL_IMAGES_FOLDER}/{file}" for file in os.listdir(settings.REAL_IMAGES_FOLDER) if file.lower().endswith(('.jpg', '.png'))]
-ai_images_path_list = [f"{settings.AI_IMAGES_FOLDER}/{file}" for file in os.listdir(settings.AI_IMAGES_FOLDER) if file.lower().endswith(('.jpg', '.png'))]
-images = real_images_path_list + ai_images_path_list
+fake_images_path_list = [f"{settings.FAKE_IMAGES_FOLDER}/{file}" for file in os.listdir(settings.FAKE_IMAGES_FOLDER) if file.lower().endswith(('.jpg', '.png'))]
+images = real_images_path_list + fake_images_path_list
 
 real_images_category = ["REAL"] * len(real_images_path_list)
-ai_images_category = ["AI"] * len(ai_images_path_list)
-image_categories = real_images_category + ai_images_category
+fake_images_category = ["FAKE"] * len(fake_images_path_list)
+image_categories = real_images_category + fake_images_category
 
 print(f"Given data: {len(images)} images")
 print(f"Real images: {len(real_images_path_list)}")
-print(f"AI images: {len(ai_images_path_list)}")
+print(f"FAKE images: {len(fake_images_path_list)}")
 
 if not os.path.exists(HISTOGRAMS_FILE):
     # computing histograms
