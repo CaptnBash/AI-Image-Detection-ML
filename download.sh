@@ -25,3 +25,6 @@ rename_files test/real
 mv train/fake/* test/fake/* FAKE
 mv train/real/* test/real/* REAL
 
+rm -r train test
+rm archive.zip
+
