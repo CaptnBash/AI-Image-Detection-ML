@@ -59,7 +59,11 @@ def get_image_categories() -> list[str]:
 
 def load_or_calculate_histograms():
     if os.path.exists(HISTOGRAMS_FILE):
-        return np.load(HISTOGRAMS_FILE) 
+        histograms = np.load(HISTOGRAMS_FILE)
+        if len(histograms)  != IMAGE_TRAIN_COUNT :
+            os.remove(HISTOGRAMS_FILE)
+            load_or_calculate_histograms()
+        return histograms
     else:
         image_files = get_imagefile_lists()
         histograms, bad_images = calculate_histograms(image_files)
@@ -75,8 +79,6 @@ def delete_bad_images(images: list):
 
 
 def main():
-    print(f"Using {IMAGE_TRAIN_COUNT*2} images")
-
     histograms = load_or_calculate_histograms()
     categories = get_image_categories()
 
