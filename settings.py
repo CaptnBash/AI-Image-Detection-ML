@@ -9,3 +9,5 @@ MAX_WORKERS = 20  # Adjust based on your network bandwidth (10-50 typically good
 
 REAL_IMAGES_FOLDER = "REAL"
 FAKE_IMAGES_FOLDER = "FAKE"
+
+IMAGE_TRAIN_COUNT = 999999
