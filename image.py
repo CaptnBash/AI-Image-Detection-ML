@@ -4,7 +4,7 @@ from settings import *
 
 import cv2
 import numpy as np
-from progress.bar import Bar
+import concurrent.futures as cf
 from sklearn.metrics import accuracy_score
 from sklearn.model_selection import train_test_split
 
@@ -21,24 +21,27 @@ def compute_histogram(image_path, bins=256):
     except Exception as e:
         print(f"Error processing {image_path}: {str(e)}")
         return None
-
-
-def calculate_histograms(image_files: list[str]):
-    bad_images = []
-    histograms = []
+    
+def process_batch(image_paths, max_workers=None):
+    success_results = []
+    failed_images = []
     start_time = time.time()
-    with Bar("Computing histograms...", max=len(image_files)) as bar:
-        for image in image_files:
-            histogram = compute_histogram(image)
-            if histogram is None:
-                bad_images.append(image)
+    with cf.ProcessPoolExecutor(max_workers=max_workers) as executor:
+        future_to_path = {
+            executor.submit(compute_histogram, path): path 
+            for path in image_paths
+        }
+        
+        for future in cf.as_completed(future_to_path):
+            path = future_to_path[future]
+            result = future.result()
+            if result is not None:
+                success_results.append(result)
             else:
-                histograms.append(histogram)
-            bar.next()
-    histograms = np.array(histograms)
-
+                failed_images.append(path)
+    
     print("took " + time.strftime("%Hh %Mm %Ss", time.gmtime(time.time() - start_time)))
-    return histograms, bad_images
+    return success_results, failed_images
 
 def get_imagefile_lists():
     real_images = get_imagefile_list(REAL_IMAGES_FOLDER)
@@ -66,7 +69,7 @@ def load_or_calculate_histograms():
         return histograms
     else:
         image_files = get_imagefile_lists()
-        histograms, bad_images = calculate_histograms(image_files)
+        histograms, bad_images = process_batch(image_files)
 
         if len(bad_images) > 0: delete_bad_images(bad_images)
         np.save(HISTOGRAMS_FILE, histograms)
@@ -90,7 +93,6 @@ def main():
     clf = model_helper.get_model(X_train, y_train, save=False)
     print("took " + time.strftime("%Hh %Mm %Ss", time.gmtime(time.time() - start_time)))
 
-    # making predictions
     predictions = clf.predict(X_test)
 
     score = accuracy_score(y_test, predictions)
