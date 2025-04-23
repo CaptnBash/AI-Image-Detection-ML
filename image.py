@@ -21,7 +21,7 @@ def compute_histogram(image_path, bins=256):
     except Exception as e:
         print(f"Error processing {image_path}: {str(e)}")
         return None
-    
+
 
 def calculate_histograms(image_files: list[str]):
     bad_images = []
@@ -37,7 +37,7 @@ def calculate_histograms(image_files: list[str]):
             bar.next()
     histograms = np.array(histograms)
 
-    print("\ntook " + time.strftime("%Hh %Mm %Ss", time.gmtime(time.time() - start_time)))
+    print("took " + time.strftime("%Hh %Mm %Ss", time.gmtime(time.time() - start_time)))
     return histograms, bad_images
 
 def get_imagefile_lists():
@@ -48,7 +48,7 @@ def get_imagefile_lists():
 def get_imagefile_list(folder: str):
     return [f"{folder}/{file}" 
             for file in os.listdir(folder) 
-            if file.lower().endswith(('.jpg', '.png'))][:IMAGE_TRAIN_COUNT]
+            if file.lower().endswith(('.jpg', '.png'))][:int(IMAGE_TRAIN_COUNT/2)]
 
 def get_image_categories() -> list[str]:
     real_category_list = len(get_imagefile_list(REAL_IMAGES_FOLDER)) * ["REAL"]
@@ -60,16 +60,16 @@ def get_image_categories() -> list[str]:
 def load_or_calculate_histograms():
     if os.path.exists(HISTOGRAMS_FILE):
         histograms = np.load(HISTOGRAMS_FILE)
-        if len(histograms)  != IMAGE_TRAIN_COUNT :
+        if len(histograms) != round((IMAGE_TRAIN_COUNT  - .5) / 2) * 2 :
             os.remove(HISTOGRAMS_FILE)
-            load_or_calculate_histograms()
+            return load_or_calculate_histograms()
         return histograms
     else:
         image_files = get_imagefile_lists()
         histograms, bad_images = calculate_histograms(image_files)
 
-        delete_bad_images(bad_images)
-        np.save(HISTOGRAMS_FILE, histograms)      
+        if len(bad_images) > 0: delete_bad_images(bad_images)
+        np.save(HISTOGRAMS_FILE, histograms)
         return histograms
 
 def delete_bad_images(images: list):
@@ -81,6 +81,8 @@ def delete_bad_images(images: list):
 def main():
     histograms = load_or_calculate_histograms()
     categories = get_image_categories()
+
+    print(f"\nLoaded a total of {len(histograms)} images!")
 
     X_train, X_test, y_train, y_test = train_test_split(histograms, categories, test_size=TEST_SIZE)
 
