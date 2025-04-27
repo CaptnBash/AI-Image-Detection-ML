@@ -40,10 +40,8 @@ def compute_histogram(image_path, bins=256):
         os.close(stderr_save)
 
 def process_batch(image_paths, max_workers=None):
-    print("Processing images...")
-    success_results = []
+    histogram_list = []
     failed_images = []
-    start_time = time.time()
     with cf.ProcessPoolExecutor(max_workers=max_workers) as executor:
         future_to_path = {
             executor.submit(compute_histogram, path): path 
@@ -54,44 +52,57 @@ def process_batch(image_paths, max_workers=None):
             path = future_to_path[future]
             result = future.result()
             if result is not None:
-                success_results.append(result)
+                histogram_list.append(result)
             else:
                 failed_images.append(path)
-    
-    print("took " + time.strftime("%Hh %Mm %Ss", time.gmtime(time.time() - start_time)))
-    return success_results, failed_images
+        return np.array(histogram_list), failed_images
 
 def get_imagefile_lists():
     real_images = get_imagefile_list(REAL_IMAGES_FOLDER)
     fake_images = get_imagefile_list(FAKE_IMAGES_FOLDER)
-    return real_images + fake_images
+    return real_images, fake_images
 
 def get_imagefile_list(folder: str):
     return [f"{folder}/{file}" 
             for file in os.listdir(folder) 
             if file.lower().endswith(('.jpg', '.png'))][:int(IMAGE_TRAIN_COUNT/2)]
 
-def get_image_categories() -> list[str]:
-    real_category_list = len(get_imagefile_list(REAL_IMAGES_FOLDER)) * ["REAL"]
-    fake_category_list = len(get_imagefile_list(FAKE_IMAGES_FOLDER)) * ["FAKE"]
-    category_list = real_category_list + fake_category_list
-
-    return category_list
+def get_image_categories(real_amount: int, fake_amount: int) -> list[str]:
+    print(f"Loaded {real_amount + fake_amount} images ({real_amount} real, {fake_amount} fake)")
+    real_category_list = ["REAL"] * real_amount
+    fake_category_list = ["FAKE"] * fake_amount
+    return real_category_list + fake_category_list
 
 def load_or_calculate_histograms():
     if os.path.exists(HISTOGRAMS_FILE):
-        histograms = np.load(HISTOGRAMS_FILE)
-        if len(histograms) != round((IMAGE_TRAIN_COUNT  - .5) / 2) * 2 :
-            os.remove(HISTOGRAMS_FILE)
-            return load_or_calculate_histograms()
-        return histograms
-    else:
-        image_files = get_imagefile_lists()
-        histograms, bad_images = process_batch(image_files)
+        histograms_tuple = np.load(HISTOGRAMS_FILE, allow_pickle=True)
+        real_histograms, fake_histograms = histograms_tuple
+        total_histograms = len(real_histograms) + len(fake_histograms)
 
-        if len(bad_images) > 0: delete_bad_images(bad_images)
-        np.save(HISTOGRAMS_FILE, histograms)
-        return histograms
+        if total_histograms != IMAGE_TRAIN_COUNT:
+            os.remove(HISTOGRAMS_FILE)
+            print("Invalid histogram file. Recalculating...")
+        else:
+            return np.concatenate((real_histograms, fake_histograms)), len(real_histograms), len(fake_histograms)
+
+    print("Processing images...")
+    start_time = time.time()
+
+    real_images, fake_images = get_imagefile_lists()
+    real_histograms, real_bad_images = process_batch(real_images)
+    fake_histograms, fake_bad_images = process_batch(fake_images)
+
+    bad_images = real_bad_images + fake_bad_images
+    if bad_images:
+        delete_bad_images(bad_images)
+
+    histograms_tuple = (real_histograms, fake_histograms)
+    np.save(HISTOGRAMS_FILE, histograms_tuple)
+
+    print(f"Processed {len(real_histograms) + len(fake_histograms)} images in "
+          f"{time.strftime('%Hh %Mm %Ss', time.gmtime(time.time() - start_time))}.")
+
+    return np.concatenate((real_histograms, fake_histograms)), len(real_histograms), len(fake_histograms)
 
 def delete_bad_images(images: list):
     for image in images:
@@ -100,16 +111,12 @@ def delete_bad_images(images: list):
 
 
 def main():
-    histograms = load_or_calculate_histograms()
-    categories = get_image_categories()
-
-    print(f"\nLoaded a total of {len(histograms)} images!")
+    histograms, real_amount, fake_amount = load_or_calculate_histograms()
+    categories = get_image_categories(real_amount, fake_amount)
 
     X_train, X_test, y_train, y_test = train_test_split(histograms, categories, test_size=TEST_SIZE)
 
-    start_time = time.time()
     clf = model_helper.get_model(X_train, y_train, save=False)
-    print("took " + time.strftime("%Hh %Mm %Ss", time.gmtime(time.time() - start_time)))
 
     predictions = clf.predict(X_test)
 
