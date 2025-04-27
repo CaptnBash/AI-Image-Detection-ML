@@ -1,4 +1,4 @@
-import os
+import os, time
 from pickle import dump, load
 from sklearn.ensemble import RandomForestClassifier
 
@@ -17,8 +17,11 @@ def get_model(X_train, y_train, save=True) -> RandomForestClassifier:
         return load_model
 
 def train_model(X_train, y_train) -> RandomForestClassifier:
-    print("\ntraining model...")
-    return RandomForestClassifier().fit(X_train, y_train)
+    print("\nTraining model...", end="")
+    start_time = time.time()
+    clf = RandomForestClassifier().fit(X_train, y_train)
+    print(f"\rTrained model in {time.strftime("%Hh %Mm %Ss", time.gmtime(time.time() - start_time))}")
+    return clf
 
 def load_model() -> RandomForestClassifier:
     print("\nloading the model...")
