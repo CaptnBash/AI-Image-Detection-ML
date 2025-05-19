@@ -4,3 +4,4 @@ scikit-learn ~= 1.6.1
 matplotlib ~= 3.10.1
 progress ~= 1.6
 pandas ~= 2.2.3
+tqdm ~= 4.67.1
