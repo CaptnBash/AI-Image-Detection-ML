@@ -4,6 +4,7 @@ from settings import *
 from tempfile import NamedTemporaryFile
 
 import cv2
+from tqdm import tqdm
 import numpy as np
 import concurrent.futures as cf
 from sklearn.metrics import accuracy_score
@@ -48,7 +49,7 @@ def process_batch(image_paths, max_workers=None):
             for path in image_paths
         }
         
-        for future in cf.as_completed(future_to_path):
+        for future in tqdm(cf.as_completed(future_to_path), total=len(future_to_path)):
             path = future_to_path[future]
             result = future.result()
             if result is not None:
