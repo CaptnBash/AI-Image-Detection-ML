@@ -1,0 +1,10 @@
+.venv/
+FAKE/*.jpg
+FAKE/*.png
+REAL/*.jpg
+REAL/*.png
+
+*.npy
+*.pkl
+
+__pycache__/
